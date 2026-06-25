@@ -1,5 +1,30 @@
 import streamlit as st
-import sqlite3
+
+from assets.themes import THEMES
+from assets.theme import apply_theme
+
+from components.sidebar import render_sidebar
+from components.hero import render_hero
+from components.dashboard import render_dashboard_cards
+from components.priorities import render_priorities
+from components.life_areas import render_life_areas
+from components.productivity import render_productivity
+from components.alerts import render_alerts
+from components.focus import render_focus_card
+
+from database.dashboard_queries import (
+    load_dashboard_data
+)
+from components.activity_chart import (
+    render_activity_chart
+)
+from components.deadlines import (
+    render_deadlines
+)
+
+# =====================================================
+# PAGE CONFIG
+# =====================================================
 
 st.set_page_config(
     page_title="Student OS",
@@ -7,136 +32,100 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🎓 Student OS")
+# =====================================================
+# SIDEBAR
+# =====================================================
 
-st.subheader(
-    "The operating system for ambitious students"
+selected_theme = render_sidebar(
+    THEMES
+)
+
+theme = THEMES[selected_theme]
+
+# =====================================================
+# THEME
+# =====================================================
+
+st.markdown(
+    apply_theme(theme),
+    unsafe_allow_html=True
+)
+
+# =====================================================
+# DATA
+# =====================================================
+
+data = load_dashboard_data()
+
+# =====================================================
+# HERO
+# =====================================================
+
+render_hero()
+
+# =====================================================
+# DASHBOARD CARDS
+# =====================================================
+
+render_dashboard_cards(
+    data["total_tasks"],
+    data["event_count"],
+    data["productivity"]
 )
 
 st.divider()
 
-st.header("🔥 Top Priorities")
-
-conn = sqlite3.connect(
-    "student_os.db"
+render_focus_card(
+    data["top_tasks"]
 )
 
-cursor = conn.cursor()
+st.divider()
 
-cursor.execute("""
-SELECT *
-FROM tasks
-ORDER BY
-(importance * urgency) DESC
-LIMIT 5
-""")
+# =====================================================
+# MAIN GRID
+# =====================================================
 
-tasks = cursor.fetchall()
+left_col, right_col = st.columns([2, 1])
 
-for task in tasks:
+with left_col:
 
-    score = task[4] * task[5]
-
-    st.markdown(
-        f"""
-### 📌 {task[1]}
-
-Category: {task[2]}
-
-Priority Score: {score}
-"""
+    render_priorities(
+        data["top_tasks"]
     )
 
-conn.close()
+with right_col:
 
-# -------------------------
-# PRODUCTIVITY SCORE
-# -------------------------
-
-conn = sqlite3.connect("student_os.db")
-cursor = conn.cursor()
-
-cursor.execute("""
-SELECT COUNT(*)
-FROM tasks
-""")
-
-total_tasks = cursor.fetchone()[0]
-
-cursor.execute("""
-SELECT COUNT(*)
-FROM tasks
-WHERE completed = 1
-""")
-
-completed_tasks = cursor.fetchone()[0]
-
-conn.close()
-
-if total_tasks > 0:
-    productivity = (
-        completed_tasks /
-        total_tasks
-    ) * 100
-else:
-    productivity = 0
-
-st.divider()
-
-st.header("📊 Productivity Score")
-
-st.metric(
-    "Completion Rate",
-    f"{productivity:.1f}%"
-)
-
-st.divider()
-
-st.header("📚 Life Areas")
-
-conn = sqlite3.connect("student_os.db")
-cursor = conn.cursor()
-
-cursor.execute("""
-SELECT
-    category,
-    COUNT(*)
-FROM tasks
-GROUP BY category
-""")
-
-rows = cursor.fetchall()
-
-conn.close()
-
-for row in rows:
-
-    st.metric(
-        label=row[0],
-        value=f"{row[1]} task(s)"
+    render_life_areas(
+        data["category_rows"]
     )
 
-conn = sqlite3.connect(
-    "student_os.db"
+# =====================================================
+# PRODUCTIVITY
+# =====================================================
+
+render_productivity(
+    data["productivity"],
+    data["completed_tasks"]
 )
-
-cursor = conn.cursor()
-
-cursor.execute("""
-SELECT COUNT(*)
-FROM events
-""")
-
-event_count = cursor.fetchone()[0]
-
-conn.close()
-
-st.metric(
-    "Upcoming Events",
-    event_count
-)
-
 
 st.divider()
 
-st.header("⚠ Schedule Alerts")
+chart_col, deadline_col = st.columns([2, 1])
+
+with chart_col:
+
+    render_activity_chart(
+        data["category_rows"]
+    )
+
+with deadline_col:
+
+    render_deadlines(
+        data["top_tasks"]
+    )
+
+# =====================================================
+# ALERTS
+# =====================================================
+
+render_alerts()
