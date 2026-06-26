@@ -12,6 +12,9 @@ from components.productivity import render_productivity
 from components.alerts import render_alerts
 from components.focus import render_focus_card
 
+from database.init_db import initialize_database
+
+
 from database.dashboard_queries import (
     load_dashboard_data
 )
@@ -32,6 +35,7 @@ st.set_page_config(
     layout="wide"
 )
 
+initialize_database()
 # =====================================================
 # SIDEBAR
 # =====================================================
