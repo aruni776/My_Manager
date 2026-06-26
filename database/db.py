@@ -1,6 +1,6 @@
 import sqlite3
 
-def get_connection():
+def connect():
 
     conn = sqlite3.connect(
         "student_os.db",

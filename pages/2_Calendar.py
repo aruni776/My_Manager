@@ -222,12 +222,47 @@ if "selected_day" not in st.session_state:
 
     st.session_state["selected_day"] = date.today()
 
+if "week_offset" not in st.session_state:
+
+    st.session_state["week_offset"] = 0
+
+col_prev, col_current, col_next = st.columns(3)
+
+with col_prev:
+
+    if st.button("⬅ Previous Week"):
+
+        st.session_state["week_offset"] -= 7
+
+with col_current:
+
+    if st.button("📅 This Week"):
+
+        st.session_state["week_offset"] = 0
+        st.session_state["selected_day"] = date.today()
+
+with col_next:
+
+    if st.button("Next Week ➡"):
+
+        st.session_state["week_offset"] += 7
+
 week_days = []
+
+week_days = []
+
+start_day = (
+    date.today()
+    +
+    timedelta(
+        days=st.session_state["week_offset"]
+    )
+)
 
 for i in range(7):
 
     week_days.append(
-        date.today() + timedelta(days=i)
+        start_day + timedelta(days=i)
     )
 
 cols = st.columns(7)
