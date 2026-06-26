@@ -374,28 +374,8 @@ streamlit run app.py
 
 ---
 
-# 👨‍💻 Contributors
-
-### Jatin Choudhary
-
-Frontend Development  
-UI Design  
-Dashboard Architecture
-
-### Team Members
-
-Backend Development  
-Database Design  
-Scheduling Logic
-
----
 
 # 📄 License
 
 This project is licensed under the MIT License.
 
----
-
-<p align="center">
-Built with ❤️ using Streamlit and Python
-</p>
