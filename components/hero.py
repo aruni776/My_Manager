@@ -8,7 +8,7 @@ def render_hero():
     with col1:
 
         st.title(
-            "Welcome Back, JC"
+            "Welcome Back"
         )
 
         st.write(
